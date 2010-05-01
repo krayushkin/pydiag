@@ -2,7 +2,6 @@
 # -*- coding: windows-1251 -*-
 
 import copy
-from compiler.ast import TryExcept
 
 class IN:
     """
@@ -29,6 +28,12 @@ class M:
     def __init__(self, mask):
         ## TODO Вставить проверку на число
         self.mask = mask
+        
+    def __str__(self):
+        return str(self.mask)
+    
+    def __repr__(self):
+        return str(self)
 
 M1 = M(~0)
 M0 = M(0)
@@ -53,6 +58,13 @@ class param:
     p1 << (1, 0, 1, 0, 0, 0, 0) * 3
     """
     
+    def __str__(self):
+        s = "param:\n"
+        
+        
+    
+    def __repr__(self):
+        pass
 
     def __init__(self, chanells = None, name = "UNNAMED", in_out = IN, mask = M0):
        
@@ -62,9 +74,11 @@ class param:
        self.name = name
        # вход или выход
        self.in_out = in_out
+       self.mask = mask
+       
        # список (data, mask, io)
-       self.__repr = [] # _repr tuple of (data, mask, io)
-
+       self.__repr = [] # _repr list of (data, mask, io)
+       
 
     def __len__(self):
         """Количество тестовых наборов в параметре"""
@@ -73,11 +87,11 @@ class param:
 
     def __iter__(self):
         # TODO
-        return self
+        return NotImplemented
 
     def next(self):
         # TODO
-        return
+        return NotImplemented
     
     def __parse(self, chanells):
         res = []
@@ -104,31 +118,29 @@ class param:
     
     # other - interable type or single integer
     def __lshift__(self, other):
+     
         if hasattr(other, "__iter__"):
             # other - iterable
             print "iterable detected"
             for i in other:
-                self.__repr.append((i))
+                self.__repr.append((i, self.mask, self.in_out))
+                
                 
         elif isinstance(other, M):
             print "mask detected"
+            self.mask = other
             # other - mask
-            # TODO
-            pass
+           
             
-        elif isinstance(other, IN):
-            pass
+        elif isinstance(other, IN) or isinstance(other, OUT):
+            self.in_out = other
             
-        elif isinstance(other, OUT):
-            pass
             
         else:
             # single integer
-            __data.append(other)
-            return self
-        
-        
-
+            __data.append(other, self.mask, self.in_out)
+            
+        return self
 
 def d(time, func_or_iterable_or_int):
     """

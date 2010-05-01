@@ -25,3 +25,5 @@ print t6.d( (1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 4, 2, 3, 4) )
 print t(5).d( lambda x: x.n)
 print d(t(3), 5 )
 
+print repr(IN)
+print OUT
