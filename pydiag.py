@@ -3,22 +3,28 @@
 
 import copy
 
-class IN:
+class IN_OUT:
     """
-    Класс для установки параметра на вход.
+    Класс для установки параметра на вход или выход.
     Например:
     p0 = param("1-32", "data")
-    p0 << IN
+    p0 << IN << 5 << OUT << 6
     """
-    pass
+    def __init__(self, in_out):
+        ## TODO Вставить проверку на число
+        if in_out in ("in", "out" ): 
+            self.in_out = in_out
+        else:
+            raise TypeError("Передано неверное значение. Возможные варианты: \"in\" и \"out\" ")
+        
+    def __str__(self):
+        return "I" if self.in_out=="in" else "O"
+    
+    def __repr__(self):
+        return str(self)
 
-class OUT:
-    """Класс для установки параметра на вход
-    Например:
-    p0 = param("1-32", "data")
-    p0 << OUT
-    """
-    pass
+IN = IN_OUT("in")
+OUT = IN_OUT("out")
 
 class M:
     """Объекты этого класса устонавливают маску,
@@ -39,16 +45,9 @@ M1 = M(~0)
 M0 = M(0)
 
 
-# Описывает параметр
-# Следующие свойства:
-# mask
+
 class param:
     """
-    param итерируемый тип:
-    p0 = param("1-32", "data")
-    p0 << d( t(1, 10) * 3, (1, 2, 4) )
-    for i in p0:
-        print i
         
     param можно создавать без указания параметров, тогда он не войдет в
     конечный тест, то вы можете использовать его в любых выражениях как
@@ -56,24 +55,39 @@ class param:
     Пример:
     p1 = param()
     p1 << (1, 0, 1, 0, 0, 0, 0) * 3
+    
+    Публичные атрибуты:
+        mask - текущая маска
+        io - текущее направление сигнала
+        n_ch - количество разрядов
+        ch - перечень каналов
     """
     
     def __str__(self):
-        s = "param:\n"
-        
-        
+        s = "param {0}:\n".format(self.name)
+        if self.__repr != 0:
+            d, m, io = zip(*self.__repr) 
+            s += "d:  " + str(d) + "\n"
+            s += "io: " + str(io) + "\n"       
+            s += "m:  " + str(m) + "\n"
+        else:
+            s += "Пусто\n"
+        s += "current mask: " + str(self.mask) + "\n"
+        s += "current io: " + str(self.io)+ "\n"
+        return s
     
     def __repr__(self):
-        pass
+        return str(self)
 
-    def __init__(self, chanells = None, name = "UNNAMED", in_out = IN, mask = M0):
+    def __init__(self, chanells = None, name = "UNNAMED", io = IN, mask = M0):
        
        # tuple каналов
-       self.chanells = self.__parse(chanells)
+       self.ch = self.__parse(chanells)
+       self.n_ch = len(self.ch)
        # имя
        self.name = name
        # вход или выход
-       self.in_out = in_out
+       self.io = io
        self.mask = mask
        
        # список (data, mask, io)
@@ -118,27 +132,30 @@ class param:
     
     # other - interable type or single integer
     def __lshift__(self, other):
-     
+        """
+        other может быть:
+            а) Числом
+            б) Любым итерируемым типом
+            в) Маской (т.е. M1, M0 или любым другим объектом класса M)
+            г) Входом или выходом (т.е. IN или OUT)
+        """ 
         if hasattr(other, "__iter__"):
             # other - iterable
-            print "iterable detected"
             for i in other:
-                self.__repr.append((i, self.mask, self.in_out))
+                self.__repr.append((i, self.mask, self.io))
                 
                 
         elif isinstance(other, M):
-            print "mask detected"
             self.mask = other
             # other - mask
            
             
-        elif isinstance(other, IN) or isinstance(other, OUT):
-            self.in_out = other
-            
+        elif isinstance(other, IN_OUT):
+            self.io = other
             
         else:
             # single integer
-            __data.append(other, self.mask, self.in_out)
+            self.__repr.append( (other, self.mask, self.io ) )
             
         return self
 
@@ -348,7 +365,7 @@ class t:
             for i in xrange( len(self.__data) ):
                 if self.__data[i] == 1:
                     self.t = i
-                    self.p = self.__period
+                    self.p = self.__period[i]
                     try:
                         result.append( func_or_iterable_or_int() )
                     except TypeError:
