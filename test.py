@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-p0
-import pydiag
+
 from pydiag import *
 
 print IN
@@ -15,12 +15,26 @@ addr_max = 2 ** ad.n_ch
 
 ad = d( (t(0, 3) + t(5) + t(0, 3)) * addr_max, lambda x: x.p)
 
+wr << IN <<(2, 4, 65, 67, 2,3,4) << OUT << 3 << 6 << M0 << 7 << M1 << 34 << 45
 
-print ad
+print "address:"
+print wr
 
 
 
-
+iter1 = iter(wr)
+iter2 = iter(wr)
+print "2: ", iter1.next()
+print "4: ", iter1.next()
+print "65: ", iter1.next()
+print "2: ", iter2.next()
+print "4: ", iter2.next()
+print "65: ", iter2.next()
+print "67: ", iter1.next()
+print "2: ", iter1.next()
+print "67: ", iter2.next()
+print "2: ", iter2.next()
+print "3: ", iter2.next()
 
 t2 = t(3)
 t3 = t(2, 5)

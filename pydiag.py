@@ -11,7 +11,6 @@ class IN_OUT:
     p0 << IN << 5 << OUT << 6
     """
     def __init__(self, in_out):
-        ## TODO Вставить проверку на число
         if in_out in ("in", "out" ): 
             self.in_out = in_out
         else:
@@ -61,17 +60,22 @@ class param:
         io - текущее направление сигнала
         n_ch - количество разрядов
         ch - перечень каналов
+        name - имя параметра
+        
+    Поддерживаются два итератора: __iter__() и dmio_iter()
+    Первый позоляет перебирать данные параметра, а второй используется для
+    итерации коллекции всех данных, элементами которых является кортеж (ДАННЫЕ, МАСКА, ВХОД/ВЫХОД) 
     """
     
     def __str__(self):
         s = "param {0}:\n".format(self.name)
-        if self.__repr != 0:
+        if len(self.__repr) > 0:
             d, m, io = zip(*self.__repr) 
             s += "d:  " + str(d) + "\n"
             s += "io: " + str(io) + "\n"       
             s += "m:  " + str(m) + "\n"
         else:
-            s += "Пусто\n"
+            s += "<--Empty-->\n"
         s += "current mask: " + str(self.mask) + "\n"
         s += "current io: " + str(self.io)+ "\n"
         return s
@@ -98,16 +102,49 @@ class param:
         """Количество тестовых наборов в параметре"""
         return len(self.__repr)
 
+    def iter1_generator(self):
+        for d, m, io in self.__repr:
+            yield d
 
     def __iter__(self):
-        # TODO
-        return NotImplemented
-
-    def next(self):
-        # TODO
-        return NotImplemented
+        """
+        Первый итератор. Позволяет перебирать элементы типа data.
+        Например:
+            p1 = param()
+            p1 << (1, 0, 1, 0, 0, 0, 0) * 3
+            i = 0
+            for d in p1:
+                print "TN =", i
+                print "data =", d
+                i = i + 1
+        """
+        
+        return self.iter1_generator()
     
+    def iter2_generator(self):
+        for value in self.__repr:
+            yield value
+
+    def dmio_iter(self):
+        """
+        Второй итератор. Позволяет перебирать элементы типа (data, mask, io), а не
+        только data, как в первом итераторе.
+        Например:
+            p1 = param()
+            p1 << (1, 0, 1, 0, 0, 0, 0) * 3
+            i = 0
+            for d, m, io in p1.dmio_iter():
+                print "TN =", i
+                print "data =", d, "mask =", m, "io =", io
+                i = i + 1
+        """
+        return self.iter2_generator()
+
+
     def __parse(self, chanells):
+        """
+        Парсит строку каналов
+        """
         res = []
         chanells = chanells.replace(" ", "")
         chanells = chanells.split(",")
