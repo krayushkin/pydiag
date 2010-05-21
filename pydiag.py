@@ -3,6 +3,64 @@
 
 import copy
 
+
+import xml.dom as xml
+
+
+def get_bit(num, n):
+    return 0 if num & (1<<n) == 0 else 1
+
+def store_params(*args):
+    channels = {}
+    
+    for p in args:
+        for ch in p.ch:
+            if ch not in channels:
+                channels[ch] = p
+            else:
+                raise AssertionError( "Duplicate channel {0} in parameter {1}. Already defined in {2} param.".format(ch, p.name, channells[ch].name) )
+                
+    
+    impl = xml.getDOMImplementation()
+    doc = impl.createDocument(None, None, None)
+    root = doc.appendChild(doc.createElement("test"))
+    
+    for ch in channels:
+        p = channels[ch]
+        index = [index for index, c in enumerate(p.ch) if c == ch][0]
+        print "ch = {0}, index = {1}, param_name = {2}".format(ch, index, p.name)
+        ch_data = []
+        ch_mask = []
+        ch_io   = []
+        
+        for d, m, io in p.dmio_iter():
+            ch_data.append(str(get_bit(d, index)))
+            ch_mask.append(str(get_bit(m.mask, index)))
+            ch_io.append( str(io) )
+
+        ch_data = "".join(ch_data)
+        ch_mask = "".join(ch_mask)
+        ch_io   = "".join(ch_io)
+        
+        channel_node = root.appendChild(doc.createElement("channel"))
+        channel_node.setAttribute( "id", str(ch) )
+        
+        if p.n_ch > 1:
+            channel_node.setAttribute( "name", "{0}_{1}".format(p.name, index) )
+        else:
+            channel_node.setAttribute( "name", p.name )
+        data_node = channel_node.appendChild(doc.createElement("data"))
+        data_node.appendChild(doc.createTextNode(ch_data))
+        mask_node = channel_node.appendChild(doc.createElement("mask"))
+        mask_node.appendChild(doc.createTextNode(ch_mask))
+        io_node = channel_node.appendChild(doc.createElement("io"))
+        io_node.appendChild(doc.createTextNode(ch_io))
+        
+    print doc.toxml()
+    
+    
+    
+    
 class IN_OUT:
     """
     Класс для установки параметра на вход или выход.
@@ -83,10 +141,10 @@ class param:
     def __repr__(self):
         return str(self)
 
-    def __init__(self, chanells = None, name = "UNNAMED", io = IN, mask = M0):
+    def __init__(self, channels = None, name = "UNNAMED", io = IN, mask = M0):
        
        # tuple каналов
-       self.ch = self.__parse(chanells)
+       self.ch = self.__parse(channels)
        self.n_ch = len(self.ch)
        # имя
        self.name = name
@@ -141,14 +199,14 @@ class param:
         return self.iter2_generator()
 
 
-    def __parse(self, chanells):
+    def __parse(self, channels):
         """
         Парсит строку каналов
         """
         res = []
-        chanells = chanells.replace(" ", "")
-        chanells = chanells.split(",")
-        for group in chanells:
+        channels = channels.replace(" ", "")
+        channels = channels.split(",")
+        for group in channels:
             if group.isdigit():
                 res.append( int( group ) )
             else:

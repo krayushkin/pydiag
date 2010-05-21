@@ -6,6 +6,9 @@ from pydiag import *
 print IN
 print OUT
 
+print get_bit(1, 0)
+print get_bit(0, 0)
+
 wr = param("1", "#WR", IN)
 rd = param("3", "#RD" , IN) 
 ad = param("4-6", "ADDR", IN)
@@ -15,11 +18,14 @@ addr_max = 2 ** ad.n_ch
 
 ad = d( (t(0, 3) + t(5) + t(0, 3)) * addr_max, lambda x: x.p)
 
-wr << IN <<(2, 4, 65, 67, 2,3,4) << OUT << 3 << 6 << M0 << 7 << M1 << 34 << 45
+wr << IN << (2, 4, 65, 67, 2, 3, 4) << OUT << 3 << 6 << M0 << 7 << M1 << 34 << 45
+rd << 1 << 0 << 1 << 1 << 1 << 0
+data << d(t(1)*10, lambda x: x.t)
+
+store_params(wr, rd, data)
 
 print "address:"
 print wr
-
 
 
 iter1 = iter(wr)
