@@ -5,6 +5,90 @@
 from pydiag import *
 import unittest
 
+class  TTestCase(unittest.TestCase):
+    def test_add_mult(self):
+
+        t0 = t(3) + t(2, 5)
+        self.assertEqual(t0.data(), [1, 1, 1, 1, 1, 0, 0, 0])
+        self.assertEqual(t0.period(), [0, 0, 0, 0, 0, 0, 0, 0])
+
+        t1 = t() + t(2, 3, 7)
+        self.assertEqual(t1.data(), [0, 0, 1, 1, 1, 0, 0, 0, 0])
+        self.assertEqual(t1.period(), [0, 0, 0, 0, 0, 0, 0, 0, 0])
+
+        t2 = t(3) + t(2, 5) + t1 + t() + t(0)
+        self.assertEqual(t2.data(), [1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0])
+        self.assertEqual(t2.period(), [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+
+        t6 = t(0, 5)
+        self.assertEqual(t6.data(), [0, 0, 0, 0, 0])
+        self.assertEqual(t6.period(), [0, 0, 0, 0, 0])
+
+        self.assertRaises(ValueError, t, 4, 0)
+
+        t8 = t(0, 0)
+        self.assertEqual(t8.data(), [])
+        self.assertEqual(t8.period(), [])
+        
+        t9 = t(0, 3, 6)
+        self.assertEqual(t9.data(), [1, 1, 1, 0, 0, 0])
+        self.assertEqual(t9.period(), [0, 0, 0, 0, 0, 0])
+
+        t10 = t(4, 0, 6)
+        self.assertEqual(t10.data(), [0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+        self.assertEqual(t10.period(), [0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+
+        self.assertRaises(ValueError, t, 7, 3, 0)
+
+        t3 = t0 * 0
+        self.assertEqual(t3.data(), [])
+        self.assertEqual(t3.period(), [])
+
+        t4 = t0 * 1
+        self.assertEqual(t4.data(), [1, 1, 1, 1, 1, 0, 0, 0])
+        self.assertEqual(t4.period(), [0, 0, 0, 0, 0, 0, 0, 0])
+
+        t5 = t0 * 3
+        self.assertEqual(t5.data(), [1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0])
+        self.assertEqual(t5.period(), [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2])
+
+        t11 = t5 + t5
+        self.assertEqual(t11.data(), [1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0] * 2)
+        self.assertEqual(t11.period(), [])
+
+        t12 = t5 * 2
+        self.assertEqual(t12.data(), [])
+        self.assertEqual(t12.period(), [])
+
+        t13 = (t5 + 2) * 3
+        self.assertEqual(t13.data(), [])
+        self.assertEqual(t13.period(), [])
+
+    def test_init(self):
+        t0 = t()
+        self.assertEqual(t0.data(), [])
+        self.assertEqual(t0.period(), [])
+
+        t1 = t(0)
+        self.assertEqual(t1.data(), [])
+        self.assertEqual(t1.period(), [])
+
+        t2 = t(3)
+        self.assertEqual(t2.data(), [1, 1, 1])
+        self.assertEqual(t2.period(), [0, 0, 0])
+
+        t3 = t(2, 5)
+        self.assertEqual(t3.data(), [1, 1, 0, 0, 0])
+        self.assertEqual(t3.period(), [0, 0, 0, 0, 0])
+
+        t4 = t(2, 3, 7)
+        self.assertEqual(t4.data(), [0, 0, 1, 1, 1, 0, 0, 0, 0])
+        self.assertEqual(t4.period(), [0, 0, 0, 0, 0, 0, 0, 0, 0])
+
+        t5 = t((1, 1, 0, 0, 1, 1, 0, 1))
+        self.assertEqual(t5.data(), [1, 1, 0, 0, 1, 1, 0, 1])
+        self.assertEqual(t5.period(), [0, 0, 0, 0, 0, 0, 0, 0])
+
 class  ParamTestCase(unittest.TestCase):
     #def setUp(self):
     #    self.foo = New_()

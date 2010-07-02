@@ -350,10 +350,13 @@ class t:
         pause = 0
         offtime = 0
         if len(arguments) == 3:
+            if (arguments[2] < arguments[1]): raise ValueError("Период не может быть меньше длительности временного отрезка")
             ontime = arguments[1]
             offtime = arguments[2] - ontime
+
             pause = arguments[0]
         elif len(arguments) == 2:
+            if (arguments[1] < arguments[0]): raise ValueError("Период не может быть меньше длительности временного отрезка")
             ontime = arguments[0]
             offtime = arguments[1] - ontime
             pause = 0
@@ -385,7 +388,13 @@ class t:
     def __len__(self):
         """ Количество ТН """
         return len(self.__data)
+
+    def data(self):
+        return self.__data
     
+    def period(self):
+        return self.__period
+
     def __repr__(self):
         def pattern(l):
             string = ""
