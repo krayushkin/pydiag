@@ -2,7 +2,7 @@
 # -*- coding: windows-1251 -*-
 
 import copy
-
+import numbers
 
 import xml.dom as xml
 
@@ -84,7 +84,8 @@ IN = IN_OUT("in")
 OUT = IN_OUT("out")
 
 class M:
-    """Объекты этого класса устонавливают маску,
+    """
+    Объекты этого класса устонавливают маску,
     разрешая или запрещая контроль на заданных разрядах
     параметра
     """
@@ -105,7 +106,6 @@ M0 = M(0)
 
 class param:
     """
-        
     param можно создавать без указания параметров, тогда он не войдет в
     конечный тест, то вы можете использовать его в любых выражениях как
     и обычный param.
@@ -121,8 +121,8 @@ class param:
         name - имя параметра
         
     Поддерживаются два итератора: __iter__() и dmio_iter()
-    Первый позоляет перебирать данные параметра, а второй используется для
-    итерации коллекции всех данных, элементами которых является кортеж (ДАННЫЕ, МАСКА, ВХОД/ВЫХОД) 
+    Первый позоляет перебирать только данные параметра, а второй используется для
+    итерации массива всех данных, элементами которых является кортеж (ДАННЫЕ, МАСКА, ВХОД/ВЫХОД)
     """
     
     def __str__(self):
@@ -142,14 +142,15 @@ class param:
         return str(self)
 
     def __init__(self, channels = None, name = "UNNAMED", io = IN, mask = M0):
-       
        # tuple каналов
        self.ch = self.__parse(channels)
+       # количество каналов
        self.n_ch = len(self.ch)
        # имя
        self.name = name
        # вход или выход
        self.io = io
+       # текущая маска
        self.mask = mask
        
        # список (data, mask, io)
@@ -160,7 +161,8 @@ class param:
         """Количество тестовых наборов в параметре"""
         return len(self.__repr)
 
-    def iter1_generator(self):
+    def __iter1_generator(self):
+        """ Генератор для первого итератора """
         for d, m, io in self.__repr:
             yield d
 
@@ -177,9 +179,10 @@ class param:
                 i = i + 1
         """
         
-        return self.iter1_generator()
+        return self.__iter1_generator()
     
-    def iter2_generator(self):
+    def __iter2_generator(self):
+        """ Генератор для второго итератора """
         for value in self.__repr:
             yield value
 
@@ -196,7 +199,7 @@ class param:
                 print "data =", d, "mask =", m, "io =", io
                 i = i + 1
         """
-        return self.iter2_generator()
+        return self.__iter2_generator()
 
 
     def __parse(self, channels):
@@ -204,6 +207,8 @@ class param:
         Парсит строку каналов
         """
         res = []
+        if channels == None or len(channels) == 0:
+            return []
         channels = channels.replace(" ", "")
         channels = channels.split(",")
         for group in channels:
@@ -233,26 +238,45 @@ class param:
             б) Любым итерируемым типом
             в) Маской (т.е. M1, M0 или любым другим объектом класса M)
             г) Входом или выходом (т.е. IN или OUT)
+            д) Кортежем (ДАННЫЕ, МАСКА, ВХОД/ВЫХОД)
         """ 
         if hasattr(other, "__iter__"):
-            # other - iterable
-            for i in other:
-                self.__repr.append((i, self.mask, self.io))
-                
+            # Если other - кортеж из (ДАННЫЕ, МАСКА, ВХОД/ВЫХОД)
+            if len(other) == 3 and isinstance(other[0], numbers.Number) and isinstance(other[1], M) and isinstance(other[2], IN_OUT):
+                self.__repr.append((other[0], other[1], other[2]))
+                self.mask = other[1]
+                self.io = other[2]
+            # Иначе other - массив чисел (numbers.Number)
+            else:
+                # Проверяем каждый элемент в последовательности (это должен быть numbers.Number)
+                for i in other:
+                    if not isinstance(i, numbers.Number):
+                        raise TypeError("В последовательности найден элемент с неверным типом")
+                # Теперь добавляем
+                for i in other:
+                    self.__repr.append((i, self.mask, self.io))
                 
         elif isinstance(other, M):
             self.mask = other
             # other - mask
-           
-            
+
         elif isinstance(other, IN_OUT):
             self.io = other
             
-        else:
+        elif isinstance(other, numbers.Number):
             # single integer
             self.__repr.append( (other, self.mask, self.io ) )
+        else:
+            raise TypeError("Неверный тип операнда")
             
         return self
+
+    def __getitem__(self, index):
+        """
+        Получить информацию о тест наборе с номером index в виде кортежа
+        (ДАННЫЕ, МАСКА, ВХОД/ВЫХОД). Нумерация тест наборов начинается с 0.
+        """
+        return self.__repr[index]
 
 def d(time, func_or_iterable_or_int):
     """
