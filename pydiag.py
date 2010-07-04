@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: windows-1251 -*-
 
+
 import copy
 import numbers
 
@@ -12,55 +13,58 @@ def get_bit(num, n):
 
 def store_params(*args):
     channels = {}
-    
     for p in args:
         for ch in p.ch:
             if ch not in channels:
                 channels[ch] = p
             else:
                 raise AssertionError( "Duplicate channel {0} in parameter {1}. Already defined in {2} param.".format(ch, p.name, channells[ch].name) )
-                
     
     impl = xml.getDOMImplementation()
     doc = impl.createDocument(None, None, None)
     root = doc.appendChild(doc.createElement("test"))
+    info_node = root.appendChild(doc.createElement("info"))
+    chinfo_node = info_node.appendChild(doc.createElement("chinfo"))
     
-    for ch in channels:
+    max_len = max( [len(p) for p in args] )
+    for p in args:
+        p.expand(max_len)
+    
+    ch_list_sorted = sorted([key for key in channels], key = lambda i: i)
+    root.setAttribute("channels", ",".join( [str(i) for i in ch_list_sorted]))
+    
+    for ch in ch_list_sorted:
         p = channels[ch]
-        index = [index for index, c in enumerate(p.ch) if c == ch][0]
-        print "ch = {0}, index = {1}, param_name = {2}".format(ch, index, p.name)
-        ch_data = []
-        ch_mask = []
-        ch_io   = []
-        
-        for d, m, io in p.dmio_iter():
-            ch_data.append(str(get_bit(d, index)))
-            ch_mask.append(str(get_bit(m.mask, index)))
-            ch_io.append( str(io) )
-
-        ch_data = "".join(ch_data)
-        ch_mask = "".join(ch_mask)
-        ch_io   = "".join(ch_io)
-        
-        channel_node = root.appendChild(doc.createElement("channel"))
-        channel_node.setAttribute( "id", str(ch) )
-        
-        if p.n_ch > 1:
-            channel_node.setAttribute( "name", "{0}_{1}".format(p.name, index) )
+        ch_node = chinfo_node.appendChild(doc.createElement("ch"))
+        ch_node.setAttribute("number", str(ch))
+        if p.n_ch == 1:
+            ch_node.setAttribute("name", str(p.name))
         else:
-            channel_node.setAttribute( "name", p.name )
-        data_node = channel_node.appendChild(doc.createElement("data"))
-        data_node.appendChild(doc.createTextNode(ch_data))
-        mask_node = channel_node.appendChild(doc.createElement("mask"))
-        mask_node.appendChild(doc.createTextNode(ch_mask))
-        io_node = channel_node.appendChild(doc.createElement("io"))
-        io_node.appendChild(doc.createTextNode(ch_io))
+            ch_node.setAttribute("name", "{0}_{1}".format(p.name, p.nbit(ch)))
         
-    print doc.toxml()
-    
-    
-    
-    
+        
+    for tn in xrange(max_len):
+        tn_node = root.appendChild(doc.createElement("tn"))
+        tn_node.setAttribute("number", str(tn))
+        
+        tn_data = []
+        tn_mask = []
+        tn_io   = []
+        for ch in ch_list_sorted:
+            p = channels[ch]
+            tn_data.append( str (get_bit(p[tn][0], p.nbit(ch))) )
+            tn_mask.append( str( get_bit(p[tn][1].mask, p.nbit(ch))))
+            tn_io.append( str(  p[tn][2] ))
+        tn_data = "".join(tn_data)
+        tn_mask = "".join(tn_mask)
+        tn_io = "".join(tn_io)
+
+        tn_node.setAttribute("data", tn_data)
+        tn_node.setAttribute("mask", tn_mask)
+        tn_node.setAttribute("io", tn_io)
+
+    print doc.toprettyxml()
+
 class IN_OUT:
     """
     Класс для установки параметра на вход или выход.
@@ -122,9 +126,21 @@ class param:
         
     Поддерживаются два итератора: __iter__() и dmio_iter()
     Первый позоляет перебирать только данные параметра, а второй используется для
-    итерации массива всех данных, элементами которых является кортеж (ДАННЫЕ, МАСКА, ВХОД/ВЫХОД)
+    итерации массива всех данных, элементами которых является кортеж
+    (ДАННЫЕ, МАСКА, ВХОД/ВЫХОД)
     """
-    
+
+    def nbit(self, channel):
+        """
+        Возвращает номер бита для канала channel. ValueError если задан
+        недопустимый (отсутствующий канал)
+        """
+        l = [i for i, ch in enumerate(self.ch) if ch == channel]
+        if len(l) == 0:
+            raise ValueError("Канал {0} не входит в список каналов этого параметра".format(channel))
+        assert len(l) == 1
+        return l[0]
+
     def __str__(self):
         s = "param {0}:\n".format(self.name)
         if len(self.__repr) > 0:
@@ -277,6 +293,18 @@ class param:
         (ДАННЫЕ, МАСКА, ВХОД/ВЫХОД). Нумерация тест наборов начинается с 0.
         """
         return self.__repr[index]
+    
+    def expand(self, l):
+        """ Расширять параметр до нужного количества ТН просто дублируя последний ТН. Если в параметре нет тест-наборов, то
+        данные = 0, а значение маски и направление канала берется из атрибутов mask и io
+        """
+        if l < len(self):
+            raise TypeError("Параметр l не может быть меньше текущего размера")
+        
+        last_tn = (0, self.mask, self.io) if len(self) == 0 else self[len(self) - 1]
+        tn_to_add = l - len(self)
+        for i in xrange(tn_to_add):
+            self << last_tn
 
 def d(time, func_or_iterable_or_int):
     """

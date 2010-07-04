@@ -5,6 +5,16 @@
 from pydiag import *
 import unittest
 
+class HelperFuncTest(unittest.TestCase):
+    def test_store_param(self):
+        wr = param("1", "#WR", IN)
+        rd = param("3", "#RD" , IN)
+        data = param("15-17", "#DATA", IN)
+        wr << IN << (2, 4, 65, 67, 2, 3, 4) << OUT << 3 << 6 << M0 << 7 << M1 << 34 << 45
+        rd << 1 << 0 << 1 << 1 << 1 << 0
+        data << d(t(1)*10, lambda x: x.t)
+        store_params(wr, rd, data)
+
 class  TTestCase(unittest.TestCase):
     def test_add_mult(self):
 
@@ -43,10 +53,12 @@ class  TTestCase(unittest.TestCase):
         t3 = t0 * 0
         self.assertEqual(t3.data(), [])
         self.assertEqual(t3.period(), [])
+        self.assertEqual(len(t3), 0)
 
         t4 = t0 * 1
         self.assertEqual(t4.data(), [1, 1, 1, 1, 1, 0, 0, 0])
         self.assertEqual(t4.period(), [0, 0, 0, 0, 0, 0, 0, 0])
+        self.assertEqual(len(t3), 0)
 
         t5 = t0 * 3
         self.assertEqual(t5.data(), [1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0])
@@ -54,15 +66,15 @@ class  TTestCase(unittest.TestCase):
 
         t11 = t5 + t5
         self.assertEqual(t11.data(), [1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0] * 2)
-        self.assertEqual(t11.period(), [])
+        self.assertEqual(t11.period(), [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2])
 
         t12 = t5 * 2
-        self.assertEqual(t12.data(), [])
-        self.assertEqual(t12.period(), [])
+        self.assertEqual(t12.data(), [1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0] * 2)
+        self.assertEqual(t12.period(), [0] * 24 + [1] * 24)
 
-        t13 = (t5 + 2) * 3
-        self.assertEqual(t13.data(), [])
-        self.assertEqual(t13.period(), [])
+        t13 = (t5 + t(2)) * 3
+        self.assertEqual(t13.data(), [1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1] * 3)
+        self.assertEqual(t13.period(), [0]*26 + [1]*26 + [2]*26 )
 
     def test_init(self):
         t0 = t()
@@ -90,13 +102,30 @@ class  TTestCase(unittest.TestCase):
         self.assertEqual(t5.period(), [0, 0, 0, 0, 0, 0, 0, 0])
 
 class  ParamTestCase(unittest.TestCase):
-    #def setUp(self):
-    #    self.foo = New_()
-    #
+    def test_nbit(self):
+        p1 = param("10, 12, 23, 30-24, 32-40, 2, 1" , "DATA", IN, M1)
+        for i, ch in enumerate(p1.ch):
+            self.assertEqual(p1.nbit(ch), i)
+        self.assertRaises(ValueError, p1.nbit, 0)
+        self.assertRaises(ValueError, p1.nbit, 3)
+        self.assertRaises(ValueError, p1.nbit, 500)
 
-    #def tearDown(self):
-    #    self.foo.dispose()
-    #    self.foo = None
+    def test_expand(self):
+        p1 = param("10, 12, 23, 30-24, 32-40, 2, 1" , "DATA", IN, M1)
+        p1.expand(15)
+        self.assertEqual( [i for i in p1.dmio_iter()], zip((0,)*15, (M1,)*15, (IN,)*15))
+        self.assertEqual( len(p1), 15)
+        
+        
+        p2 = param("10, 12, 23, 30-24, 32-40, 2, 1" , "DATA", IN, M1)
+        p2 << 5 << OUT << 10 << (2, 3, 4, 6) << M0 << xrange(5) << (90, M1, IN)
+        p2.expand(15)
+        p2_d = [5, 10, 2, 3, 4, 6, 0, 1, 2, 3, 4, 90, 90, 90, 90]
+        p2_m = [M1, M1, M1, M1, M1, M1, M0, M0, M0, M0, M0, M1, M1, M1, M1]
+        p2_io = [IN, OUT, OUT, OUT, OUT, OUT, OUT, OUT, OUT, OUT, OUT, IN, IN, IN, IN]
+        p2_dmio = zip(p2_d, p2_m, p2_io)
+        self.assertEqual( [i for i in p2.dmio_iter()], p2_dmio )
+        self.assertEqual( len(p2), 15)
 
     def test_std_iterator(self):
         p1 = param("10, 12, 23, 30-24, 32-40, 2, 1" , "DATA", IN, M1)
