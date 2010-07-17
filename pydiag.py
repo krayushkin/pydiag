@@ -24,7 +24,7 @@ def store_params(*args):
     doc = impl.createDocument(None, None, None)
     root = doc.appendChild(doc.createElement("test"))
     info_node = root.appendChild(doc.createElement("info"))
-    chinfo_node = info_node.appendChild(doc.createElement("chinfo"))
+    chgroups_node = info_node.appendChild(doc.createElement("chgroup"))
     
     max_len = max( [len(p) for p in args] )
     for p in args:
@@ -32,17 +32,23 @@ def store_params(*args):
     
     ch_list_sorted = sorted([key for key in channels], key = lambda i: i)
     root.setAttribute("channels", ",".join( [str(i) for i in ch_list_sorted]))
-    
-    for ch in ch_list_sorted:
-        p = channels[ch]
-        ch_node = chinfo_node.appendChild(doc.createElement("ch"))
-        ch_node.setAttribute("number", str(ch))
-        if p.n_ch == 1:
-            ch_node.setAttribute("name", str(p.name))
-        else:
-            ch_node.setAttribute("name", "{0}_{1}".format(p.name, p.nbit(ch)))
-        
-        
+
+
+    for p in args:
+        group_node = chgroups_node.appendChild(doc.createElement("group"))
+        group_node.setAttribute("name", str(p.name))
+        # @type p param
+        group_node.setAttribute("channels", ",".join( [str(i) for i in p.ch ]))
+
+        #Добавляем комментарии если они есть
+        if len( p.comments ) != 0:
+                group_comments_node = group_node.appendChild(doc.createElement("comments"))
+                for tn in sorted([i for i in p.comments], key = lambda item: item ):
+                    comment_node = group_comments_node.appendChild(doc.createElement("comment"))
+                    comment_node.setAttribute("tn", str(tn))
+                    comment_node.setAttribute("content", p.comments[tn])
+                    
+
     for tn in xrange(max_len):
         tn_node = root.appendChild(doc.createElement("tn"))
         tn_node.setAttribute("number", str(tn))
@@ -287,7 +293,7 @@ class param:
             self.__repr.append( (other, self.mask, self.io ) )
 
         elif isinstance(other, str):
-            self.comments[len(self)-1 ] = other
+            self.comments[len(self)] = other
 
         else:
             raise TypeError("Неверный тип операнда")

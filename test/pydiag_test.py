@@ -9,10 +9,10 @@ class HelperFuncTest(unittest.TestCase):
     def test_store_param(self):
         wr = param("1", "#WR", IN)
         rd = param("3", "#RD" , IN)
-        data = param("15-17", "#DATA", IN)
-        wr << IN << (2, 4, 65, 67, 2, 3, 4) << OUT << 3 << 6 << M0 << 7 << M1 << 34 << 45
-        rd << 1 << 0 << 1 << 1 << 1 << 0
-        data << d(t(1)*10, lambda x: x.t)
+        data = param("15-23", "#DATA", IN)
+        wr << "Строб записи" << IN << (2, 4, 65, 67, 2, 3, 4) << "Меняем направление" << OUT << 3 << 6 << "Маска" << M0 << 7 <<  M1 << "Опять маска" << 34 << "Последний ТН" << 45
+        rd << "Просто такты" << 1 << 0 << 1 << 1 << 1 << 0
+        data << "Данные" << d(t(1)*10, lambda x: x.t)
         store_params(wr, rd, data)
 
 class  TTestCase(unittest.TestCase):
@@ -115,7 +115,6 @@ class  ParamTestCase(unittest.TestCase):
         p1.expand(15)
         self.assertEqual( [i for i in p1.dmio_iter()], zip((0,)*15, (M1,)*15, (IN,)*15))
         self.assertEqual( len(p1), 15)
-        self.assertTrue(False, msg)
         
         p2 = param("10, 12, 23, 30-24, 32-40, 2, 1" , "DATA", IN, M1)
         p2 << 5 << OUT << 10 << (2, 3, 4, 6) << M0 << xrange(5) << (90, M1, IN)
@@ -234,8 +233,8 @@ class  ParamTestCase(unittest.TestCase):
         self.assertEqual(len(p1.comments), 4)
         self.assertEqual(p1.comments[0], "Начальная установка")
         self.assertEqual(p1.comments[1], "Устанавливаем на выход")
-        self.assertEqual(p1.comments[5], "Маска")
-        self.assertEqual(p1.comments[10], "И последний ТН")
+        self.assertEqual(p1.comments[6], "Маска")
+        self.assertEqual(p1.comments[11], "И последний ТН")
 
         self.assertEqual(p1.mask, M1, "Ошибка маски")
         self.assertEqual(p1.io, IN, "IN OUT error")
