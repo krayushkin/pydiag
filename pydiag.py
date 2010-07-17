@@ -2,11 +2,11 @@
 # -*- coding: windows-1251 -*-
 
 
+
 import copy
 import numbers
 
 import xml.dom as xml
-
 
 def get_bit(num, n):
     return 0 if num & (1<<n) == 0 else 1
@@ -94,7 +94,8 @@ class M:
     параметра
     """
     def __init__(self, mask):
-        ## TODO Вставить проверку на число
+        if not isinstance(mask, numbers.Number):
+            raise TypeError("mask - должен быть числом")
         self.mask = mask
         
     def __str__(self):
@@ -168,8 +169,9 @@ class param:
        self.io = io
        # текущая маска
        self.mask = mask
-       
-       # список (data, mask, io)
+       # словарь комметариев
+       self.comments = {}
+        # список (data, mask, io)
        self.__repr = [] # _repr list of (data, mask, io)
        
 
@@ -255,6 +257,7 @@ class param:
             в) Маской (т.е. M1, M0 или любым другим объектом класса M)
             г) Входом или выходом (т.е. IN или OUT)
             д) Кортежем (ДАННЫЕ, МАСКА, ВХОД/ВЫХОД)
+            e) Строкой (комментарий на текущий ТН)
         """ 
         if hasattr(other, "__iter__"):
             # Если other - кортеж из (ДАННЫЕ, МАСКА, ВХОД/ВЫХОД)
@@ -282,6 +285,10 @@ class param:
         elif isinstance(other, numbers.Number):
             # single integer
             self.__repr.append( (other, self.mask, self.io ) )
+
+        elif isinstance(other, str):
+            self.comments[len(self)-1 ] = other
+
         else:
             raise TypeError("Неверный тип операнда")
             
