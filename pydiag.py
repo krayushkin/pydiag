@@ -1,75 +1,13 @@
 #!/usr/bin/python
 # -*- coding: windows-1251 -*-
 
-
-
 import copy
 import numbers
 
-import xml.dom as xml
 
 def get_bit(num, n):
+    """ Получить разяд n в числе num """
     return 0 if num & (1<<n) == 0 else 1
-
-def store_params(*args):
-    channels = {}
-    for p in args:
-        for ch in p.ch:
-            if ch not in channels:
-                channels[ch] = p
-            else:
-                raise AssertionError( "Duplicate channel {0} in parameter {1}. Already defined in {2} param.".format(ch, p.name, channells[ch].name) )
-    
-    impl = xml.getDOMImplementation()
-    doc = impl.createDocument(None, None, None)
-    root = doc.appendChild(doc.createElement("test"))
-    info_node = root.appendChild(doc.createElement("info"))
-    chgroups_node = info_node.appendChild(doc.createElement("chgroup"))
-    
-    max_len = max( [len(p) for p in args] )
-    for p in args:
-        p.expand(max_len)
-    
-    ch_list_sorted = sorted([key for key in channels], key = lambda i: i)
-    root.setAttribute("channels", ",".join( [str(i) for i in ch_list_sorted]))
-
-
-    for p in args:
-        group_node = chgroups_node.appendChild(doc.createElement("group"))
-        group_node.setAttribute("name", str(p.name))
-        # @type p param
-        group_node.setAttribute("channels", ",".join( [str(i) for i in p.ch ]))
-
-        #Добавляем комментарии если они есть
-        if len( p.comments ) != 0:
-                group_comments_node = group_node.appendChild(doc.createElement("comments"))
-                for tn in sorted([i for i in p.comments], key = lambda item: item ):
-                    comment_node = group_comments_node.appendChild(doc.createElement("comment"))
-                    comment_node.setAttribute("tn", str(tn))
-                    comment_node.setAttribute("content", p.comments[tn])
-                    
-
-    for tn in xrange(max_len):
-        tn_node = root.appendChild(doc.createElement("tn"))
-        tn_node.setAttribute("number", str(tn))
-        
-        tn_data = []
-        tn_mask = []
-        tn_io   = []
-        for ch in ch_list_sorted:
-            p = channels[ch]
-            tn_data.append( str (get_bit(p[tn][0], p.nbit(ch))) )
-            tn_mask.append( str( get_bit(p[tn][1].mask, p.nbit(ch))))
-            tn_io.append( str(  p[tn][2] ))
-        tn_data = "".join(tn_data)
-        tn_mask = "".join(tn_mask)
-        tn_io = "".join(tn_io)
-
-        tn_node.setAttribute("data", tn_data)
-        tn_node.setAttribute("mask", tn_mask)
-        tn_node.setAttribute("io", tn_io)
-
-    print doc.toprettyxml()
 
 class IN_OUT:
     """
@@ -137,6 +75,11 @@ class param:
     (ДАННЫЕ, МАСКА, ВХОД/ВЫХОД)
     """
 
+    @staticmethod
+    def verify_params(*params):
+        
+        
+
     def nbit(self, channel):
         """
         Возвращает номер бита для канала channel. ValueError если задан
@@ -202,7 +145,6 @@ class param:
                 print "data =", d
                 i = i + 1
         """
-        
         return self.__iter1_generator()
     
     def __iter2_generator(self):
@@ -318,6 +260,17 @@ class param:
         tn_to_add = l - len(self)
         for i in xrange(tn_to_add):
             self << last_tn
+            
+    def align_to(self, source):
+        """
+        Выровнять параметр по размеру с источником путем дублирования последних ТН. Источником может быть param или другой объект для
+        которого можно вызвать len(object)
+        p1.align_to( p2 )
+        аналогично
+        p1.expand( len(p2) )
+        """
+        self.expand(len(source))
+        
 
 def d(time, func_or_iterable_or_int):
     """

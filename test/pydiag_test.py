@@ -3,6 +3,7 @@
 
 
 from pydiag import *
+import pydiag_test_xml as testxml
 import unittest
 
 class HelperFuncTest(unittest.TestCase):
@@ -13,7 +14,7 @@ class HelperFuncTest(unittest.TestCase):
         wr << "Строб записи" << IN << (2, 4, 65, 67, 2, 3, 4) << "Меняем направление" << OUT << 3 << 6 << "Маска" << M0 << 7 <<  M1 << "Опять маска" << 34 << "Последний ТН" << 45
         rd << "Просто такты" << 1 << 0 << 1 << 1 << 1 << 0
         data << "Данные" << d(t(1)*10, lambda x: x.t)
-        store_params(wr, rd, data)
+        testxml.store_params(wr, rd, data)
 
 class  TTestCase(unittest.TestCase):
     def test_add_mult(self):
@@ -109,6 +110,29 @@ class  ParamTestCase(unittest.TestCase):
         self.assertRaises(ValueError, p1.nbit, 0)
         self.assertRaises(ValueError, p1.nbit, 3)
         self.assertRaises(ValueError, p1.nbit, 500)
+
+
+    def test_align_to(self):
+        p1 = param("10, 12, 23, 30-24, 32-40, 2, 1" , "DATA", IN, M1)
+        p2 = param("24-28" , "ADDR", IN, M1)
+        p1 << [i for i in xrange(10)]
+        p2 << [i for i in xrange(15)]
+        p1.align_to(p2)
+        self.assertEqual(len(p1), len(p2))
+        
+        p1_d = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 9, 9, 9, 9, 9]
+        p1_m = [M1, M1, M1, M1, M1, M1, M1, M1, M1, M1, M1, M1, M1, M1, M1]
+        p1_i = [IN, IN, IN, IN, IN, IN, IN, IN, IN, IN, IN, IN, IN, IN, IN]
+        
+        p2_d =  (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14)
+        p2_m = (M1, M1, M1, M1, M1, M1, M1, M1, M1, M1, M1, M1, M1, M1, M1)
+        p2_i = (IN, IN, IN, IN, IN, IN, IN, IN, IN, IN, IN, IN, IN, IN, IN)
+        
+        p1dmio = zip(p1_d, p1_m, p1_i)
+        p2dmio = zip(p2_d, p2_m, p2_i)
+        
+        self.assertEqual(p1dmio, [i for i in p1.dmio_iter()])
+        self.assertEqual(p2dmio, [i for i in p2.dmio_iter()])
 
     def test_expand(self):
         p1 = param("10, 12, 23, 30-24, 32-40, 2, 1" , "DATA", IN, M1)
