@@ -75,11 +75,6 @@ class param:
     (ДАННЫЕ, МАСКА, ВХОД/ВЫХОД)
     """
 
-    @staticmethod
-    def verify_params(*params):
-        
-        
-
     def nbit(self, channel):
         """
         Возвращает номер бита для канала channel. ValueError если задан
