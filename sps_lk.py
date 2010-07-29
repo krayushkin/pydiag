@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: windows-1251 -*-
 
+
 from pydiag import *
 import struct
 import array
@@ -81,16 +82,63 @@ class sps_lk:
                 self.lk.MassData[i].FMsUrov[k*3 + 2] = 0x76;
                 self.lk.MassData[i].FMskk[0] = 0xFFFF;
         self.lk.LKData.SRea[0] = 0xE1;
-        self.lk.LKData.FRej[0] = 0x88CA | (1<<5);
+        self.lk.LKData.FRej[0] = 0x88CA;
         self.lk.LKData.FKolTN[0] = 65538;
         self.lk.LKData.FKolKan[0] = 146;        
 
     def store_params(self, *params):
+        channels = {}
+        for p in params:
+            for ch in p.ch:
+                if ch not in channels:
+                    channels[ch] = p
+                else:
+                    raise AssertionError( "Duplicate channel {0} in parameter {1}. Already defined in {2} param.".format(ch, p.name, channells[ch].name) )
+        sorted_channels = sorted([key for key in channels], key = lambda i: i)
+        max_len = max( [len(p) for p in params ] )
+        if max_len > MAXNumber16:
+            max_len = MAXNumber16
+        for p in params:
+            p.expand(max_len)
+        for ch in sorted_channels:
+            for tn in xrange(max_len):
+                d_bit = get_bit(channels[ch][tn][0], channels[ch].nbit(ch))
+                self.lk.MassData[ch/16].FMsTs[tn] |= d_bit << (ch%16)
+
+                io_bit = 1 if channels[ch][tn][2] == IN else 0
+                self.lk.MassData[ch/16].FMsKm[tn] |= io_bit << (ch%16)
+
+                m_bit = get_bit(channels[ch][tn][1].mask, channels[ch].nbit(ch))
+                self.lk.MassData[ch/16].FMsMk[tn] |= m_bit << (ch%16)
+
+        position = 0
+        ch_list_in_all_param = []
+        for p in params:
+            for ch in p.ch:
+                ch_list_in_all_param.append(ch)
+
+        for ch in ch_list_in_all_param:
+            self.lk.MassData[position/16].FMskan[position % 16] = ch
+            position = position + 1
+            name = channels[ch].name[:8] + "_" + str(channels[ch].nbit(ch)) if channels[ch].n_ch > 1 else channels[ch].name
+            name = struct.pack("11p", name)
+            name = array.array(uint8, name)
+            for i, char in enumerate(name):
+                self.lk.MassData[ch/16].FMspin[ (ch%16)*11 + i ] = char
         
+        used_ch = set(ch_list_in_all_param)
+        all_ch = set(xrange(144))
+        unused_ch = all_ch - used_ch
+
+        for ch in unused_ch:
+            self.lk.MassData[position/16].FMskan[position % 16] = ch
+            position = position + 1
+
+        self.lk.LKData.FKolTN[0] = max_len + 2
 
     def write(self, filename):
         # @type filename: string
-        with open( filename, "w") as f:
+        with open( filename, "wb") as f:
             for MassData_i in self.lk.MassData:
                 MassData_i.FMsTs.tofile(f)
                 MassData_i.FMsKm.tofile(f)
@@ -111,6 +159,3 @@ class sps_lk:
                 FCyc_i.fDiff.tofile(f)
             self.lk.LKData.FRezerv.tofile(f)
             self.lk.LKData.FMsOst.tofile(f)
-
-lk = sps_lk()
-lk.write("x:/helloo.lk")

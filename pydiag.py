@@ -104,7 +104,7 @@ class param:
 
     def __init__(self, channels = None, name = "UNNAMED", io = IN, mask = M0):
        # tuple каналов
-       self.ch = self.__parse(channels)
+       self.ch = [ i - 1 for i in self.__parse(channels)]
        # количество каналов
        self.n_ch = len(self.ch)
        # имя
