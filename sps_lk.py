@@ -13,6 +13,8 @@ uint32 = "I"
 MAXNumber16 = 0x10000
 CountPlats = 9
 
+
+
 class TCycleEvensData:
     def __init__(self):
     #   инфа о циклах
@@ -159,3 +161,9 @@ class sps_lk:
                 FCyc_i.fDiff.tofile(f)
             self.lk.LKData.FRezerv.tofile(f)
             self.lk.LKData.FMsOst.tofile(f)
+
+def end():
+    lk = sps_lk()
+    list = [p[i] for i in p]
+    lk.store_params(*list)
+    lk.write(PROGRAM_NAME+".lk")

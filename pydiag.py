@@ -51,7 +51,12 @@ class M:
 M1 = M(~0)
 M0 = M(0)
 
+p = {}
+unnamed_id = 0
+PROGRAM_NAME = "UNNAMED"
 
+def prog_name(name):
+    PROGRAM_NAME = name
 
 class param:
     """
@@ -102,13 +107,16 @@ class param:
     def __repr__(self):
         return str(self)
 
-    def __init__(self, channels = None, name = "UNNAMED", io = IN, mask = M0):
+    def __init__(self, name = "UNNAMED", channels = None, io = IN, mask = M0):
        # tuple каналов
        self.ch = [ i - 1 for i in self.__parse(channels)]
        # количество каналов
        self.n_ch = len(self.ch)
        # имя
-       self.name = name
+       if name == "UNNAMED":
+           self.name = name+str(unnamed_id)
+       else:
+           self.name = name
        # вход или выход
        self.io = io
        # текущая маска
@@ -117,7 +125,7 @@ class param:
        self.comments = {}
         # список (data, mask, io)
        self.__repr = [] # _repr list of (data, mask, io)
-       
+       p[self.name] = self
 
     def __len__(self):
         """Количество тестовых наборов в параметре"""
