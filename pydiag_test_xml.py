@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# -*- coding: windows-1251 -*-
+# -*- coding: utf8 -*-
 
 from pydiag import *
 import xml.dom as xml
@@ -34,7 +34,7 @@ def store_params(*args):
         # @type p param
         group_node.setAttribute("channels", ",".join( [str(i) for i in p.ch ]))
 
-        #Добавляем комментарии если они есть
+        #Р”РѕР±Р°РІР»СЏРµРј РєРѕРјРјРµРЅС‚Р°СЂРёРё РµСЃР»Рё РѕРЅРё РµСЃС‚СЊ
         if len( p.comments ) != 0:
                 group_comments_node = group_node.appendChild(doc.createElement("comments"))
                 for tn in sorted([i for i in p.comments], key = lambda item: item ):

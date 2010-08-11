@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# -*- coding: windows-1251 -*-
+# -*- coding: utf8 -*-
 
 
 from pydiag import *
@@ -17,51 +17,51 @@ CountPlats = 9
 
 class TCycleEvensData:
     def __init__(self):
-    #   инфа о циклах
-    #   quint32 fTn0;   // нач. ТН
+    #   РёРЅС„Р° Рѕ С†РёРєР»Р°С…
+    #   quint32 fTn0;   // РЅР°С‡. РўРќ
         self.fTn0 = array.array(uint32, [0] )
-    #   quint32 fLength; // глубина цикла
+    #   quint32 fLength; // РіР»СѓР±РёРЅР° С†РёРєР»Р°
         self.fLength = array.array(uint32, [0] )
-    #   quint16 fCount; // кол-во повторений // 1 - бесконечность
+    #   quint16 fCount; // РєРѕР»-РІРѕ РїРѕРІС‚РѕСЂРµРЅРёР№ // 1 - Р±РµСЃРєРѕРЅРµС‡РЅРѕСЃС‚СЊ
         self.fCount = array.array(uint16, [0] )
-    #   quint16 fDiff; // перепад (побитно: 15-14 - 00-нет/ 01 - 0/ 10 - 1/ 11 - по 0 и по 1
-    #   // (не исп.)// 13-0 - номер канала перепада)
+    #   quint16 fDiff; // РїРµСЂРµРїР°Рґ (РїРѕР±РёС‚РЅРѕ: 15-14 - 00-РЅРµС‚/ 01 - 0/ 10 - 1/ 11 - РїРѕ 0 Рё РїРѕ 1
+    #   // (РЅРµ РёСЃРї.)// 13-0 - РЅРѕРјРµСЂ РєР°РЅР°Р»Р° РїРµСЂРµРїР°РґР°)
         self.fDiff = array.array(uint16, [0] )
     
 class TMassData16:
     def __init__(self):
-    #   quint16 FMsTs[MAXNumber16];  //массив теста(уровень 0/1)
+    #   quint16 FMsTs[MAXNumber16];  //РјР°СЃСЃРёРІ С‚РµСЃС‚Р°(СѓСЂРѕРІРµРЅСЊ 0/1)
         self.FMsTs = array.array(uint16, [0 for i in xrange(MAXNumber16)] )
-    #   quint16 FMsKm[MAXNumber16];  // массив коммутации(приемн/перед)
+    #   quint16 FMsKm[MAXNumber16];  // РјР°СЃСЃРёРІ РєРѕРјРјСѓС‚Р°С†РёРё(РїСЂРёРµРјРЅ/РїРµСЂРµРґ)
         self.FMsKm = array.array(uint16, [0 for i in xrange(MAXNumber16)] )
-    #   quint16 FMsMk[MAXNumber16];  // массив маски(выкл /вкл)
+    #   quint16 FMsMk[MAXNumber16];  // РјР°СЃСЃРёРІ РјР°СЃРєРё(РІС‹РєР» /РІРєР»)
         self.FMsMk = array.array(uint16, [0 for i in xrange(MAXNumber16)] )
-    #   quint8 FMskan[16]; // соответствие номеров каналов строкам при перетаскивании (default: 0 – 143 или 0 - 95)
+    #   quint8 FMskan[16]; // СЃРѕРѕС‚РІРµС‚СЃС‚РІРёРµ РЅРѕРјРµСЂРѕРІ РєР°РЅР°Р»РѕРІ СЃС‚СЂРѕРєР°Рј РїСЂРё РїРµСЂРµС‚Р°СЃРєРёРІР°РЅРёРё (default: 0 вЂ“ 143 РёР»Рё 0 - 95)
         self.FMskan = array.array(uint8, [0 for i in xrange(16)] )
-    #   quint8 FMspin[16][11];  // название контактов (примечание) (default:’’)
+    #   quint8 FMspin[16][11];  // РЅР°Р·РІР°РЅРёРµ РєРѕРЅС‚Р°РєС‚РѕРІ (РїСЂРёРјРµС‡Р°РЅРёРµ) (default:вЂ™вЂ™)
         self.FMspin = array.array(uint8, [0 for i in xrange(16*11)] )
-    #   quint8 FMsUrov[16][3];  // 0-уровни 0    1- уровни 1   2-ур.компаратора (default: [x,0]:=$80; [x,1]:=$5D; [x,2]:=$76;)
+    #   quint8 FMsUrov[16][3];  // 0-СѓСЂРѕРІРЅРё 0    1- СѓСЂРѕРІРЅРё 1   2-СѓСЂ.РєРѕРјРїР°СЂР°С‚РѕСЂР° (default: [x,0]:=$80; [x,1]:=$5D; [x,2]:=$76;)
         self.FMsUrov = array.array(uint8, [0 for i in xrange(16*3)] )
-    #   quint16 FMskk;         // отображение каналов (побитовое  выкл/вкл ) (default: $FFFF)
+    #   quint16 FMskk;         // РѕС‚РѕР±СЂР°Р¶РµРЅРёРµ РєР°РЅР°Р»РѕРІ (РїРѕР±РёС‚РѕРІРѕРµ  РІС‹РєР»/РІРєР» ) (default: $FFFF)
         self.FMskk = array.array(uint16, [0] )
-    #   quint16 FAdv[16];  //зарезервированный (default: $0000)
+    #   quint16 FAdv[16];  //Р·Р°СЂРµР·РµСЂРІРёСЂРѕРІР°РЅРЅС‹Р№ (default: $0000)
         self.FAdv = array.array(uint16, [0 for i in xrange(16)] )
 
 class ToffsenData16:
     def __init__(self):
     #   quint8 SRea;  //(default: $E1)
         self.SRea = array.array(uint8, [0] )
-    #   quint16 FRej;  // (default: $88CA) параметры режима (побитно): 0-внеш 1-брак ур. 2-шаг 3 брак фун. 4-цикл 5-удерж.ур. 6-стоп 7-конец 8-11-частота 12-запуск ф/с 13-частота ф/с 14-перепад 15-вставка
+    #   quint16 FRej;  // (default: $88CA) РїР°СЂР°РјРµС‚СЂС‹ СЂРµР¶РёРјР° (РїРѕР±РёС‚РЅРѕ): 0-РІРЅРµС€ 1-Р±СЂР°Рє СѓСЂ. 2-С€Р°Рі 3 Р±СЂР°Рє С„СѓРЅ. 4-С†РёРєР» 5-СѓРґРµСЂР¶.СѓСЂ. 6-СЃС‚РѕРї 7-РєРѕРЅРµС† 8-11-С‡Р°СЃС‚РѕС‚Р° 12-Р·Р°РїСѓСЃРє С„/СЃ 13-С‡Р°СЃС‚РѕС‚Р° С„/СЃ 14-РїРµСЂРµРїР°Рґ 15-РІСЃС‚Р°РІРєР°
         self.FRej = array.array(uint16, [0] )
-    #   quint32 FKolTN; //(default: 65538) Количество тест-наборов +2
+    #   quint32 FKolTN; //(default: 65538) РљРѕР»РёС‡РµСЃС‚РІРѕ С‚РµСЃС‚-РЅР°Р±РѕСЂРѕРІ +2
         self.FKolTN = array.array(uint32, [0] )
-    #   quint8 FKolKan; //(default:146) Количество каналов +2
+    #   quint8 FKolKan; //(default:146) РљРѕР»РёС‡РµСЃС‚РІРѕ РєР°РЅР°Р»РѕРІ +2
         self.FKolKan = array.array(uint8, [0] )
-    #   TCycleEvensData FCyc[8];  // циклы (не более 8)
+    #   TCycleEvensData FCyc[8];  // С†РёРєР»С‹ (РЅРµ Р±РѕР»РµРµ 8)
         self.FCyc = [TCycleEvensData() for i in xrange(8)]
-    #   quint8 FRezerv[5];       // резерв
+    #   quint8 FRezerv[5];       // СЂРµР·РµСЂРІ
         self.FRezerv = array.array(uint8, [0 for i in xrange(5)] )
-    #   quint8 FMsOst[MAXNumber16]; // точки останова 1-стоп, 2- конец,3- вставка, 4-цикл, 5-метка
+    #   quint8 FMsOst[MAXNumber16]; // С‚РѕС‡РєРё РѕСЃС‚Р°РЅРѕРІР° 1-СЃС‚РѕРї, 2- РєРѕРЅРµС†,3- РІСЃС‚Р°РІРєР°, 4-С†РёРєР», 5-РјРµС‚РєР°
         self.FMsOst = array.array(uint8, [0 for i in xrange(MAXNumber16)] )
 
 class FLKData16:

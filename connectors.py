@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# -*- coding: windows-1251 -*-
+# -*- coding: utf8 -*-
 
 def to_c135(s):
     d = {}
