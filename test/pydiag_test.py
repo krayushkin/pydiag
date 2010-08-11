@@ -1,5 +1,5 @@
-#!/usr/bin/python
-# -*- coding: windows-1251 -*-
+ï»¿#!/usr/bin/python
+# -*- coding: utf8 -*-
 
 
 from pydiag import *
@@ -11,9 +11,9 @@ class HelperFuncTest(unittest.TestCase):
         wr = param("1", "#WR", IN)
         rd = param("3", "#RD" , IN)
         data = param("15-23", "#DATA", IN)
-        wr << "Ñòðîá çàïèñè" << IN << (2, 4, 65, 67, 2, 3, 4) << "Ìåíÿåì íàïðàâëåíèå" << OUT << 3 << 6 << "Ìàñêà" << M0 << 7 <<  M1 << "Îïÿòü ìàñêà" << 34 << "Ïîñëåäíèé ÒÍ" << 45
-        rd << "Ïðîñòî òàêòû" << 1 << 0 << 1 << 1 << 1 << 0
-        data << "Äàííûå" << d(t(1)*10, lambda x: x.t)
+        wr << "Ð¡Ñ‚Ñ€Ð¾Ð± Ð·Ð°Ð¿Ð¸ÑÐ¸" << IN << (2, 4, 65, 67, 2, 3, 4) << "ÐœÐµÐ½ÑÐµÐ¼ Ð½Ð°Ð¿Ñ€Ð°Ð²Ð»ÐµÐ½Ð¸Ðµ" << OUT << 3 << 6 << "ÐœÐ°ÑÐºÐ°" << M0 << 7 <<  M1 << "ÐžÐ¿ÑÑ‚ÑŒ Ð¼Ð°ÑÐºÐ°" << 34 << "ÐŸÐ¾ÑÐ»ÐµÐ´Ð½Ð¸Ð¹ Ð¢Ð" << 45
+        rd << "ÐŸÑ€Ð¾ÑÑ‚Ð¾ Ñ‚Ð°ÐºÑ‚Ñ‹" << 1 << 0 << 1 << 1 << 1 << 0
+        data << "Ð”Ð°Ð½Ð½Ñ‹Ðµ" << d(t(1)*10, lambda x: x.t)
         testxml.store_params(wr, rd, data)
 
 class  TTestCase(unittest.TestCase):
@@ -235,11 +235,11 @@ class  ParamTestCase(unittest.TestCase):
         p1 = param("10, 12, 23, 30-24, 32-40, 2, 1" , "DATA", IN, M1)
 
 
-        p1 << "Íà÷àëüíàÿ óñòàíîâêà"
+        p1 << "ÐÐ°Ñ‡Ð°Ð»ÑŒÐ½Ð°Ñ ÑƒÑÑ‚Ð°Ð½Ð¾Ð²ÐºÐ°"
 
-        p1 << 5 << "Óñòàíàâëèâàåì íà âûõîä"
-        p1 << OUT << 10 << (2, 3, 4, 6) << "Ìàñêà"
-        p1 << M0 << xrange(5) << "È ïîñëåäíèé ÒÍ" << (90, M1, IN)
+        p1 << 5 << "Ð£ÑÑ‚Ð°Ð½Ð°Ð²Ð»Ð¸Ð²Ð°ÐµÐ¼ Ð½Ð° Ð²Ñ‹Ñ…Ð¾Ð´"
+        p1 << OUT << 10 << (2, 3, 4, 6) << "ÐœÐ°ÑÐºÐ°"
+        p1 << M0 << xrange(5) << "Ð˜ Ð¿Ð¾ÑÐ»ÐµÐ´Ð½Ð¸Ð¹ Ð¢Ð" << (90, M1, IN)
 
         p1_d = [d for d, m, io in p1.dmio_iter()]
         self.assertEqual(p1_d, [5, 10, 2, 3, 4, 6, 0, 1, 2, 3, 4, 90])
@@ -255,24 +255,24 @@ class  ParamTestCase(unittest.TestCase):
             self.assertEqual(p1[i], p1_dmio[i])
 
         self.assertEqual(len(p1.comments), 4)
-        self.assertEqual(p1.comments[0], "Íà÷àëüíàÿ óñòàíîâêà")
-        self.assertEqual(p1.comments[1], "Óñòàíàâëèâàåì íà âûõîä")
-        self.assertEqual(p1.comments[6], "Ìàñêà")
-        self.assertEqual(p1.comments[11], "È ïîñëåäíèé ÒÍ")
+        self.assertEqual(p1.comments[0], "ÐÐ°Ñ‡Ð°Ð»ÑŒÐ½Ð°Ñ ÑƒÑÑ‚Ð°Ð½Ð¾Ð²ÐºÐ°")
+        self.assertEqual(p1.comments[1], "Ð£ÑÑ‚Ð°Ð½Ð°Ð²Ð»Ð¸Ð²Ð°ÐµÐ¼ Ð½Ð° Ð²Ñ‹Ñ…Ð¾Ð´")
+        self.assertEqual(p1.comments[6], "ÐœÐ°ÑÐºÐ°")
+        self.assertEqual(p1.comments[11], "Ð˜ Ð¿Ð¾ÑÐ»ÐµÐ´Ð½Ð¸Ð¹ Ð¢Ð")
 
-        self.assertEqual(p1.mask, M1, "Îøèáêà ìàñêè")
+        self.assertEqual(p1.mask, M1, "ÐžÑˆÐ¸Ð±ÐºÐ° Ð¼Ð°ÑÐºÐ¸")
         self.assertEqual(p1.io, IN, "IN OUT error")
         self.assertEqual(len(p1), 12, "Invalid len")
 
     def test_init(self):
         p0 = param()
-        self.assertEqual(p0.ch, [], "Ñïèñîê êàíàëîâ íå ïóñò")
-        self.assertEqual(p0.n_ch, 0, "Êîëè÷åñòâî êàíàëîâ íå ðàâíî 0")
+        self.assertEqual(p0.ch, [], "Ð¡Ð¿Ð¸ÑÐ¾Ðº ÐºÐ°Ð½Ð°Ð»Ð¾Ð² Ð½Ðµ Ð¿ÑƒÑÑ‚")
+        self.assertEqual(p0.n_ch, 0, "ÐšÐ¾Ð»Ð¸Ñ‡ÐµÑÑ‚Ð²Ð¾ ÐºÐ°Ð½Ð°Ð»Ð¾Ð² Ð½Ðµ Ñ€Ð°Ð²Ð½Ð¾ 0")
 
         p1 = param("10, 12, 23, 30-24, 32-40, 2, 1" , "DATA", IN, M1)
-        self.assertEqual(p1.ch, [10, 12, 23, 30, 29, 28, 27, 26, 25, 24, 32, 33, 34, 35, 36, 37, 38, 39, 40, 2, 1], "Ñïèñîê êàíàëîâ íåâåðåí")
-        self.assertEqual(p1.n_ch, 21, "Íåâåðíîå êîëè÷åñòâî êàíàëîâ")
-        self.assertEqual(p1.mask, M1, "Îøèáêà ìàñêè")
+        self.assertEqual(p1.ch, [10, 12, 23, 30, 29, 28, 27, 26, 25, 24, 32, 33, 34, 35, 36, 37, 38, 39, 40, 2, 1], "Ð¡Ð¿Ð¸ÑÐ¾Ðº ÐºÐ°Ð½Ð°Ð»Ð¾Ð² Ð½ÐµÐ²ÐµÑ€ÐµÐ½")
+        self.assertEqual(p1.n_ch, 21, "ÐÐµÐ²ÐµÑ€Ð½Ð¾Ðµ ÐºÐ¾Ð»Ð¸Ñ‡ÐµÑÑ‚Ð²Ð¾ ÐºÐ°Ð½Ð°Ð»Ð¾Ð²")
+        self.assertEqual(p1.mask, M1, "ÐžÑˆÐ¸Ð±ÐºÐ° Ð¼Ð°ÑÐºÐ¸")
         self.assertEqual(p1.io, IN, "IN OUT error")
         self.assertEqual(p1.name, "DATA", "IN OUT error")
             
